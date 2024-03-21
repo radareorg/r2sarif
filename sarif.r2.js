@@ -1,3 +1,4 @@
+var sarifRegisterPlugin = (function() {
 const sarifTemplate = {
   $schema: 'http://json.schemastore.org/sarif-2.1.0',
   version: '2.1.0',
@@ -311,4 +312,6 @@ function sarifRegisterPlugin () {
     };
   });
 }
+return sarifRegisterPlugin;
+})();
 sarifRegisterPlugin();

@@ -4,7 +4,10 @@ Static Analysis Results Interchange Format (SARIF) Version 2.0
 
 ## Description
 
-This plugin for radare2 adds the `sarif` command to the r2 shell which allows to import and export SARIF documents (JSON files) into the current session, allowing the analyst to report and visualize the reported vulnerabilities in a binary using a standard file format.
+This plugin for radare2 adds the `sarif` command to the r2 shell which allows
+to import and export SARIF documents (JSON files) into the current session,
+allowing the analyst to report and visualize the reported vulnerabilities in
+a binary using a standard file format.
 
 ## Usage
 
@@ -28,7 +31,8 @@ First you need to load the rules that you plan to report as findings:
 [0x00000000]> sarif -l rule.json
 ```
 
-Those can be listed with `sarif -l` (note that there's no argument here). At this point you are ready to report your first finding!
+Those can be listed with `sarif -l` (note that there's no argument here). At
+this point you are ready to report your first finding!
 
 * Seek to the offset where the vulnerability is spotted
 * Run `sarif -aw rules.mastg-android-insecure-random-use Do not use this API`
