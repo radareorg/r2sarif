@@ -1,0 +1,33 @@
+{
+  "name": "sarif-ts",
+  "version": "0.2.0",
+  "description": "TypeScript SARIF API",
+  "type": "commonjs",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.js",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.28",
+    "@typescript-eslint/eslint-plugin": "^7.2.0",
+    "@typescript-eslint/parser": "^7.2.0",
+    "eslint": "^8.34.0",
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "README.md",
+    "package.json",
+    "package-lock.json",
+    "dist/index.js"
+  ],
+  "keywords": [
+    "sarif",
+    "document",
+    "findings"
+  ]
+}
