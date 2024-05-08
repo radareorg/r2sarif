@@ -29,5 +29,8 @@
     "sarif",
     "document",
     "findings"
-  ]
+  ],
+  "dependencies": {
+    "ajv": "^8.13.0"
+  }
 }
