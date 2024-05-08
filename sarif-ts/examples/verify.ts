@@ -1,5 +1,13 @@
-import { readFileSync} from "fs";
+import { readFileSync } from "fs";
 import { verifySarif } from "../sarif/utils.js";
 
-const data : any = readFileSync("test-sarif.json");
-const result = verifySarif(JSON.parse(data));
+const data: any = JSON.parse(readFileSync("test-sarif.json", "utf-8"));
+const result = verifySarif(data);
+if (result === true) {
+    console.log("SARIF document is valid");
+} else {
+    console.error(result);
+    for (let err of result) {
+        console.log(err.instancePath + " " + err.message);
+    }
+}
