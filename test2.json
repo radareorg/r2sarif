@@ -33,7 +33,7 @@
                   "uriBaseId": "%SRCROOT%"
                 },
                 "region": {
-                  "startByteOffset": 1024,
+                  "byteOffset": 1024,
                   "byteLength": 128
                 }
               },

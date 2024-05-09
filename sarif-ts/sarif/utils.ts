@@ -68,7 +68,7 @@ export function makeBinaryLocation(fileUri: string, memoryAddress: string, offse
                 uriBaseId: "%SRCROOT%"
             },
             region: {
-                startByteOffset: offset,
+                byteOffset: offset,
                 byteLength: length
             }
         },

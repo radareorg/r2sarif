@@ -71,7 +71,7 @@ var sarifRegisterPlugin = (function () {
             if (loc0 && loc0.properties && loc0.properties.memoryAddress) {
               locations.push({
                 va: loc0.properties.memoryAddress,
-		  pa: phyloc.region.startByteOffset,
+		  pa: phyloc.region.byteOffset,
 		  sz: phyloc.region.byteLength
               });
             } else {
@@ -136,7 +136,7 @@ var sarifRegisterPlugin = (function () {
             uriBaseId: '%SRCROOT%'
           },
           region: {
-            startByteOffset: locations,
+            byteOffset: locations,
             byteLength: 128
           }
         },
@@ -147,7 +147,7 @@ var sarifRegisterPlugin = (function () {
       for (const loc of locations) {
         const myLoc = locationTemplate;
         myLoc.physicalLocation.region = {
-          startByteOffset: loc.pa,
+          byteOffset: loc.pa,
           byteLength: loc.sz
         };
         myLoc.properties = {

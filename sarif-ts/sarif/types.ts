@@ -49,7 +49,7 @@ export interface BinaryPhysicalLocation {
 }
 
 export interface BinaryRegionLocation {
-    startByteOffset: number;
+    byteOffset: number;
     byteLength: number;
 }
 
