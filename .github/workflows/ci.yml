@@ -33,8 +33,9 @@ jobs:
         export R2PM_OFFLINE=1
         make -C sarif-ts plugin.r2.js
         cp sarif-ts/plugin.r2.js sarif.r2.js
-    - name: Running tests
-      run: r2r test/db
+# commented because requires r2-5.9.3
+#    - name: Running tests
+#      run: r2r test/db
     - uses: actions/upload-artifact@v4
       with:
         name: sarif.r2.js

@@ -2,12 +2,10 @@ NAME=sarif world
 FILE=-
 ARGS=-i ../sarif-ts/plugin.r2.js
 CMDS=<<EOF
-pwd
 ?e hello sarif
 ?ee error message
 EOF
 EXPECT=<<EOF
-/Users/pancake/prg/r2sarif/test
 hello sarif
 EOF
 EXPECT_ERR=<<EOF
