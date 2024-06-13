@@ -1,0 +1,39 @@
+NAME=sarif world
+FILE=-
+ARGS=-i ../sarif-ts/plugin.r2.js
+CMDS=<<EOF
+pwd
+?e hello sarif
+?ee error message
+EOF
+EXPECT=<<EOF
+/Users/pancake/prg/r2sarif/test
+hello sarif
+EOF
+EXPECT_ERR=<<EOF
+error message
+EOF
+RUN
+
+NAME=sarif help
+FILE=-
+ARGS=-i ../sarif-ts/plugin.r2.js
+CMDS=<<EOF
+sarif help
+EOF
+EXPECT=<<EOF
+Usage: sarif [action] [args...]
+sarif alias [newalias]  - create an alias for the sarif command
+sarif help              - show this help message (-h)
+sarif import [file]     - import sarif info from given file
+sarif list [help]       - list drivers, rules and results
+sarif reset             - unload all documents
+sarif select [N]        - select the nth driver
+TODO
+sarif -a, add [r] [c]       - add a new sarif finding
+sarif -aw,-ae,-an [r] [c]   - add warning, error or note'
+sarif -e, export [file]     - export sarif findings into given file or stdout
+sarif -r, r2|script         - generate r2 script with loaded sarif info
+
+EOF
+RUN

@@ -1,13 +1,29 @@
 import { SarifDocument, Result, Location } from "./types.js"; // Assuming sarif-types.ts defines the interfaces
 
 export class SarifParser {
-    public parse(sarifString: string): SarifDocument | Error | undefined {
+    public parse(sarifString: string): SarifDocument | Error {
+        const obj: any = JSON.parse(sarifString);
+        if (typeof obj["driver"] === "object") {
+            return this.parseDriver(sarifString);
+        }
+        return this.parseDocument(sarifString)
+    }
+
+    public parseDocument(sarifString: string): SarifDocument | Error {
         try {
             const sarifDoc: SarifDocument = JSON.parse(sarifString);
-            return this.validateSarif(sarifDoc); // Add validation (optional)
+            const res = this.validateSarif(sarifDoc); // Add validation (optional)
+            if (res instanceof Error) {
+                return res;
+            }
+            return sarifDoc;
         } catch (err) {
             return err;
         }
+    }
+
+    public parseDriver(sarifString: string) : SarifDocument | Error {
+        return new Error("Not implemented");
     }
 
     private validateSarif(sarifDoc: SarifDocument): Error | undefined {

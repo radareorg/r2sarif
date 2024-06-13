@@ -1,49 +1,62 @@
-
-
 import { Location, Run, Result, SarifDocument, SarifError } from "./types.js";
 import { sarifSchemeVersion } from "./template.js";
-import { makeSourceLocation, makeBinaryLocation } from "./utils.js";
+// import { makeSourceLocation, makeBinaryLocation } from "./utilsgen.js";
+
+export class SarifRun {
+    constructor(toolName: string, toolVersion: string) {
+
+    }
+    toString(): string {
+        return "run";
+    }
+}
 
 export class SarifGenerator {
-    private run: Run = { tool: { driver: { name: "", version: "", rules: [] } }, results: [] };
+    private run: Run = { tool: { driver: { name: "", semanticVersion: "", version: "", rules: [] } }, results: [] };
     public results: Result[] = [];
-    private runs: Run[] = [];
+    private runs: SarifRun[] = [];
 
     constructor() {
 
     }
 
-    appendRun(toolName: string, toolVersion: string) {
+    appendRun(toolName: string, toolVersion: string) : SarifRun {
+        const sr = new SarifRun(toolName, toolVersion);
+        this.runs.push(sr);
+        return sr;
+        /*
         this.runs.push({
             tool: {
                 driver: {
                     name: toolName,
                     version: toolVersion,
+                    semanticVersion: toolVersion,
                     rules: []
                 }
             },
             results: this.results
         })
-        this.results = [];
+        this.results = []; 
+        */
     }
 
-    addError(message: string, location: Location) {
-        this.results.push({ level: "error", message, location });
+    addError(ruleId: string, message: string, location: Location) {
+        this.results.push({ level: "error", ruleId: ruleId, message, location });
     }
 
-    addWarning(message: string, location: Location) {
-        this.results.push({ level: "warning", message, location });
+    addWarning(ruleId: string, message: string, location: Location) {
+        this.results.push({ ruleId: ruleId, level: "warning", message, location });
     }
 
-    addNote(message: string, location: Location) {
-        this.results.push({ level: "note", message, location });
+    addNote(ruleId: string, message: string, location: Location) {
+        this.results.push({ ruleId: ruleId, level: "note", message, location });
     }
 
     getSarif(): SarifDocument | SarifError {
         if (this.run.results.length === 0) {
             return new SarifError("SARIF document missing results");
         }
-        return { version: sarifSchemeVersion, runs: this.runs };
+        return { version: sarifSchemeVersion, runs: []};
     }
 }
 
