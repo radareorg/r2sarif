@@ -3,10 +3,14 @@
   "version": "2.1.0",
   "runs": [
     {
+      "properties": {
+	      "name": "radare2",
+	      "version": "5.9.1"
+      },
       "tool": {
         "driver": {
-          "name": "radare2",
-          "semanticVersion": "1.0.0",
+          "name": "NowSecure SARIF Findings",
+          "semanticVersion": "0.0.1",
           "rules": [
             {
               "id": "EXAMPLE-VULN-001",

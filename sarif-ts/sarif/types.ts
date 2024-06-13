@@ -1,13 +1,20 @@
 // SARIF Document Structure (simplified)
 
 export interface Result {
+    ruleId: string;
     level: ResultLevel;
     message: string;
     location: Location; // (optional) file, line, column information
     relatedLocations?: Location[]; // (optional) additional locations
 }
 
-export type ResultLevel = "error" | "warning" | "note" | "none";
+// it's ugly that typescript can't enforce this at the language level
+const levels = ["error", "warning", "note"];
+export type ResultLevel = (typeof levels)[number];
+export function isValidLevel(k: string) : boolean {
+    return levels.indexOf(k) !== -1;
+}
+
 
 export interface SourceLocation {
     fileUri: string;
@@ -18,7 +25,7 @@ export interface SourceLocation {
 export class SarifError extends Error {
     constructor(message: string) {
         super(message);
-        this.name = this.constructor.name;
+        this.name = "SarifError"; // this.constructor.name;
     }
 }
 
@@ -53,21 +60,43 @@ export interface BinaryRegionLocation {
     byteLength: number;
 }
 
-export interface Tool {
-    driver: {
-        name: string;
-        version: string;
-        rules: [];
-    };
+export interface Driver {
+    name: string;
+    version: string; // e.g., "0.3-beta4"
+    semanticVersion: string; // e.g., "2.4.0"
+    rules: Rule[];
 }
 
-export interface shortDescription {
+export interface Tool {
+    driver: Driver
+}
+
+/*
+export interface SarifResult {
+    // {"ruleId":"EXAMPLE-VULN-001","level":"error","message":{"text":"Buffer overflow vulnerability detected."},"locations":[{"physicalLocation":{"artifactLocation":{"uri":"binary://example-binary","uriBaseId":"%SRCROOT%"},"region":{"byteOffset":1024,"byteLength":128}},"properties":{"memoryAddress":"0x0040321A"}}]}]}
+    ruleId: string;
+    level: ResultLevel;
+    message: {
+        text:string;
+    };
+    locations: SarifLocation[];
+}
+    */
+
+export interface ShortDescription {
     text: string // "Potential buffer overflow."
+}
+
+export interface SarifRule {
+    driver :Driver;
+    rule: Rule;
 }
 
 export interface Rule {
     "id": string; // "EXAMPLE-VULN-001",
-    "shortDescription": shortDescription,
+    "level": string,
+    "shortDescription": ShortDescription | undefined,
+    "fullDescription": ShortDescription | undefined,
     "helpUri": string, // "http://example.com/vulnerability/EXAMPLE-VULN-001"
 }
 
@@ -80,3 +109,5 @@ export interface SarifDocument {
     version: string; // e.g., "2.4.0"
     runs: Run[];
 }
+
+

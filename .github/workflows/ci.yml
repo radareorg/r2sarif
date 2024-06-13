@@ -1,0 +1,66 @@
+name: CI
+
+env:
+  R2V: 5.9.2
+
+on:
+  push:
+    branches:
+#      - master
+#  pull_request:
+#  schedule:
+#    - cron: '0 0 * * 1'
+
+jobs:
+  linux:
+    name: linux
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Installing radare2
+      run: |
+        wget https://github.com/radareorg/radare2/releases/download/${{env.R2V}}/radare2_${{env.R2V}}_amd64.deb
+        wget https://github.com/radareorg/radare2/releases/download/${{env.R2V}}/radare2-dev_${{env.R2V}}_amd64.deb
+        sudo dpkg -i radare2_${{env.R2V}}_amd64.deb
+        sudo dpkg -i radare2-dev_${{env.R2V}}_amd64.deb
+    - name: Installing r2frida
+      run: |
+        wget https://github.com/nowsecure/r2frida/releases/download/${{env.R2V}}/r2frida_${{env.R2V}}_amd64.deb
+        sudo dpkg -i r2frida_${{env.R2V}}_amd64.deb
+    - name: Building
+      run: |
+        export R2PM_OFFLINE=1
+        make -C sarif-ts plugin.r2.js
+        cp sarif-ts/plugin.r2.js sarif.r2.js
+# commented because requires r2-5.9.3
+#    - name: Running tests
+#      run: r2r test/db
+    - uses: actions/upload-artifact@v4
+      with:
+        name: sarif.r2.js
+        path: sarif.r2.js
+  macos:
+    name: macos
+    runs-on: macos-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Installing radare2
+      run: |
+        git clone --depth=1 https://github.com/radareorg/radare2
+        radare2/sys/install.sh > /dev/null
+    - name: Installing r2frida
+      run: |
+        r2pm -ci r2frida > /dev/null
+    - name: Building
+      run: |
+        export R2PM_OFFLINE=1
+        make -C sarif-ts plugin.r2.js
+        cp sarif-ts/plugin.r2.js sarif.r2.js
+    - name: Running tests
+      run: r2r test/db
+#    - uses: actions/upload-artifact@v4
+#      with:
+#        name: sarif.r2.js
+#        path: sarif.r2.js
