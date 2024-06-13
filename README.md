@@ -1,6 +1,6 @@
 # SARIF for Radare2
 
-![ci](https://github.com/radareorg/r2sarif/actions/workflows/ci.yml/badge.svg?branch=master)
+![ci](https://github.com/radareorg/r2sarif/actions/workflows/ci.yml/badge.svg?branch=main)
 
 Static Analysis Results Interchange Format (SARIF) Version 2.0
 
