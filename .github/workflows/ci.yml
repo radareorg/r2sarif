@@ -60,7 +60,7 @@ jobs:
         cp sarif-ts/plugin.r2.js sarif.r2.js
     - name: Running tests
       run: r2r test/db
-    - uses: actions/upload-artifact@v4
-      with:
-        name: sarif.r2.js
-        path: sarif.r2.js
+#    - uses: actions/upload-artifact@v4
+#      with:
+#        name: sarif.r2.js
+#        path: sarif.r2.js
