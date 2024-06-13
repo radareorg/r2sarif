@@ -25,7 +25,7 @@ export interface SourceLocation {
 export class SarifError extends Error {
     constructor(message: string) {
         super(message);
-        this.name = this.constructor.name;
+        this.name = "SarifError"; // this.constructor.name;
     }
 }
 
