@@ -21,16 +21,17 @@ sarif help
 EOF
 EXPECT=<<EOF
 Usage: sarif [action] [args...]
+sarif add [L] [id] [M]  - add a new result with selected driver
 sarif alias [newalias]  - create an alias for the sarif command
+sarif export            - export added rules as sarif json
 sarif help              - show this help message (-h)
-sarif load [file]       - import sarif info from given file
-sarif unload [N]        - unload the nth document
 sarif list [help]       - list drivers, rules and results
+sarif load [file]       - import sarif info from given file
+sarif r2                - generate r2 script to import current doc results
 sarif reset             - unload all documents
 sarif select [N]        - select the nth driver
+sarif unload [N]        - unload the nth document
 sarif version           - show plugin version
-sarif add [L] [id] [M]  - add a new result with selected driver
-sarif r2                - generate r2 script to import current doc results
 
 EOF
 RUN
