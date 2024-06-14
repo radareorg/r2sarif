@@ -1,4 +1,4 @@
-# SARIF for Radare2
+# SARIF support for Radare2
 
 ![ci](https://github.com/radareorg/r2sarif/actions/workflows/ci.yml/badge.svg?branch=main)
 
@@ -11,19 +11,33 @@ to import and export SARIF documents (JSON files) into the current session,
 allowing the analyst to report and visualize the reported vulnerabilities in
 a binary using a standard file format.
 
+## Installation
+
+This is the recommended way to install r2sarif nowadays, in your home and symlinked.
+
+```
+$ make && make user-symstall
+```
+
+For distro packaging reasons you may want to use make install instead.
+
+Use the classic `user-uninstall` and `uninstall` targets to get rid of it.
+
 ## Usage
 
 ```
 [0x00000000]> sarif?
-sarif [action] [arguments]
-sarif -h, help              - show this help message (-h)
-sarif -a, add [r] [c]       - add a new sarif finding
-sarif -aw,-ae,-an [r] [c]   - add warning, error or note
-sarif -i, import [file]     - import sarif info from given file
-sarif -j, json              - print the spotted findings as json to stdout
-sarif -r, r2|script         - generate r2 script with loaded sarif info
-sarif -R, reset             - reset reported findings list
-sarif -l, rules ([file])    - list or load rules from file
+sarif add [L] [id] [M]  - add a new result with selected driver
+sarif alias [newalias]  - create an alias for the sarif command
+sarif export            - export added rules as sarif json
+sarif help              - show this help message (-h)
+sarif list [help]       - list drivers, rules and results
+sarif load [file]       - import sarif info from given file
+sarif r2                - generate r2 script to import current doc results
+sarif reset             - unload all documents
+sarif select [N]        - select the nth driver
+sarif unload [N]        - unload the nth document
+sarif version           - show plugin version
 [0x00000000]>
 ```
 
