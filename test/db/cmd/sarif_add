@@ -27,7 +27,6 @@ sarif add rqeuites: warning, error or note as first argument
 -- add 3 bad id
 No driver selected
 -- add 3 invalid id
-  0   SARIF Findings      0.0.1
 Selected driver:
 * 0   SARIF Findings      0.0.1
 SF00001             Context Registered Broadcast Receivers Not Protected with Permissions
@@ -53,7 +52,6 @@ sarif r2
 sarif dump
 EOF
 EXPECT=<<EOF
-  0   SARIF Findings      0.0.1
 Selected driver:
 * 0   SARIF Findings      0.0.1
 SF00001             Context Registered Broadcast Receivers Not Protected with Permissions

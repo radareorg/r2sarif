@@ -196,7 +196,7 @@ class R2Sarif {
             this.currentDriver = null;
             return true;
         }
-        const drivers = this.listDrivers();
+        const drivers = this.listDrivers(true);
         if (index < drivers.length) {
             this.currentDriver = drivers[index];
             this.currentDriverIndex = index;
@@ -228,14 +228,16 @@ class R2Sarif {
         }
     }
 
-    listDrivers() : Driver[] {
+    listDrivers(silent?: boolean) : Driver[] {
         var res : Driver[] = [];
         let count = 0;
         for (const doc of this.docs) {
             for (const run of doc.runs) {
                 const driver = run.tool.driver;
                 const driverCount = count++;
-                this.listDriver(driverCount, driver);
+		if (!silent) {
+                    this.listDriver(driverCount, driver);
+		}
                 res.push(driver);
             }
         }
