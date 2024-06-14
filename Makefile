@@ -6,6 +6,9 @@ all: sarif.r2.js
 r2: sarif.r2.js
 	r2 -i sarif.r2.js /bin/ls
 
+clean:
+	rm -f sarif.r2.js src/types.js
+
 vs:
 	open -a "Visual Studio Code" .
 
