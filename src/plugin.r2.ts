@@ -301,7 +301,7 @@ class R2Sarif {
 
     add(level: ResultLevel, ruleId: string, messageText: string) : boolean{
         if (this.currentDriver === null) {
-            r2.error("No driver selected");
+            r2.log("No driver selected");
             return false;
         }
         const rules = this.listRulesForDriver(this.currentDriver);
@@ -401,7 +401,9 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
                 const textMessage = args.slice(3).join (" ");
                 if (isValidLevel(levelType)) {
                     r2s.add(levelType, ruleId, textMessage);
-                }
+                } else {
+                    r2.log("sarif add rqeuites: warning, error or note as first argument")
+		}
             } else {
                 r2.log("sarif add [type] [id] [message]")
                 r2.log("type = warning, error, note")
