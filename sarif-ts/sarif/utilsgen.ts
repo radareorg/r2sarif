@@ -1,7 +1,5 @@
 import { SourceLineLocation, SourceLocation, BinaryLocation } from "./types";
 
-import { readFileSync } from "fs";
-
 export function makeSourceLocation(fileUri: string, lineNumber: number, columnNumber?: number): SourceLineLocation | SourceLocation {
     if (columnNumber === undefined) {
         return {
@@ -16,7 +14,7 @@ export function makeSourceLocation(fileUri: string, lineNumber: number, columnNu
     };
 }
 
-export function makeBinaryLocation(fileUri: string, memoryAddress: string, offset: number, length: number): BinaryLocation {
+export function makeBinaryLocation(fileUri: string, memoryAddress: string, offset: number, size: number): BinaryLocation {
     return {
         physicalLocation: {
             artifactLocation: {
@@ -25,7 +23,7 @@ export function makeBinaryLocation(fileUri: string, memoryAddress: string, offse
             },
             region: {
                 byteOffset: offset,
-                byteLength: length
+                byteLength: size
             }
         },
         properties: {
@@ -35,7 +33,6 @@ export function makeBinaryLocation(fileUri: string, memoryAddress: string, offse
 }
 
 export function tabulateText(columns: string[], columnWidths: number[]) : string {
-    // implement this
     let resultingText = "";
     let col = 0;
     for (const column of columns) {

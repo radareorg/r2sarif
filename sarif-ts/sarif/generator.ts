@@ -41,19 +41,19 @@ export class SarifGenerator {
     }
 
     addError(ruleId: string, message: string, location: Location) {
-        this.results.push({ level: "error", ruleId: ruleId, message, location });
+        this.results.push({ level: "error", ruleId: ruleId, "message": {text: message}, locations: [location] });
     }
 
     addWarning(ruleId: string, message: string, location: Location) {
-        this.results.push({ ruleId: ruleId, level: "warning", message, location });
+        this.results.push({ ruleId: ruleId, level: "warning","message": {text:message}, locations: [location] });
     }
 
     addNote(ruleId: string, message: string, location: Location) {
-        this.results.push({ ruleId: ruleId, level: "note", message, location });
+        this.results.push({ ruleId: ruleId, level: "note", "message": {text:message}, locations: [location ]});
     }
 
     getSarif(): SarifDocument | SarifError {
-        if (this.run.results.length === 0) {
+        if (this.run.results && this.run.results.length === 0) {
             return new SarifError("SARIF document missing results");
         }
         return { version: sarifSchemeVersion, runs: []};

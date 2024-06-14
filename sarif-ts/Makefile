@@ -5,6 +5,9 @@ vs vsc:
 	open -a "Visual Studio Code" .
 
 test:
+	$(MAKE) -C .. test
+
+xxtest:
 	make -C examples/hello
 
 lint:
@@ -20,3 +23,5 @@ plugin.r2.js: plugin.r2.ts
 
 pub:
 	npm pub
+
+.PHONY: pub r2 lint test vs vsc all
