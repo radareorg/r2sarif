@@ -1,10 +1,13 @@
-// SARIF Document Structure (simplified)
+// Simplified SARIF Document Structure
 
+export interface ResultMessage {
+    text: string;
+}
 export interface Result {
     ruleId: string;
     level: ResultLevel;
-    message: string;
-    location: Location; // (optional) file, line, column information
+    message: ResultMessage;
+    locations: Location[]; // (optional) file, line, column information
     relatedLocations?: Location[]; // (optional) additional locations
 }
 
@@ -62,8 +65,8 @@ export interface BinaryRegionLocation {
 
 export interface Driver {
     name: string;
-    version: string; // e.g., "0.3-beta4"
-    semanticVersion: string; // e.g., "2.4.0"
+    version?: string; // e.g., "0.3-beta4"
+    semanticVersion?: string; // e.g., "2.4.0"
     rules: Rule[];
 }
 
@@ -94,6 +97,7 @@ export interface SarifRule {
 
 export interface Rule {
     "id": string; // "EXAMPLE-VULN-001",
+    "name": string,
     "level": string,
     "shortDescription": ShortDescription | undefined,
     "fullDescription": ShortDescription | undefined,
@@ -102,7 +106,7 @@ export interface Rule {
 
 export interface Run {
     tool: Tool;
-    results: Result[];
+    results?: Result[];
 }
 
 export interface SarifDocument {

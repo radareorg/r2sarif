@@ -1,3 +1,5 @@
+// ajv is written in commonjs, so it requires
+
 import { SourceLineLocation, SourceLocation, BinaryLocation } from "./types";
 
 import { readFileSync } from "fs";

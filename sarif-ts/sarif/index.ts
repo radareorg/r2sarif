@@ -15,8 +15,8 @@ class Sarif {
     for (const run of sarifDocument.runs) {
       // maybe this should be a warning.. and loadingRules should return a LoadingReport instead
       if (!run.tool || !run.tool.driver || !run.tool.driver.rules) {
-        continue;
         // return new SarifError("Missing driver rules");
+        continue;
       }
       for (const rule of run.tool.driver.rules) {
         this.rulesLoaded.set(rule.id, rule);

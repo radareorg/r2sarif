@@ -23,15 +23,31 @@ EXPECT=<<EOF
 Usage: sarif [action] [args...]
 sarif alias [newalias]  - create an alias for the sarif command
 sarif help              - show this help message (-h)
-sarif import [file]     - import sarif info from given file
+sarif load [file]       - import sarif info from given file
+sarif unload [N]        - unload the nth document
 sarif list [help]       - list drivers, rules and results
 sarif reset             - unload all documents
 sarif select [N]        - select the nth driver
-TODO
-sarif -a, add [r] [c]       - add a new sarif finding
-sarif -aw,-ae,-an [r] [c]   - add warning, error or note'
-sarif -e, export [file]     - export sarif findings into given file or stdout
-sarif -r, r2|script         - generate r2 script with loaded sarif info
+sarif version           - show plugin version
+sarif add [L] [id] [M]  - add a new result with selected driver
+sarif r2                - generate r2 script to import current doc results
 
 EOF
+RUN
+
+NAME=sarif load
+CMDS=<<EOF
+pwd
+sarif load examples/driver.sarif.json
+sarif list docs
+EOF
+EXPECT_ERR=
+RUN
+
+NAME=sarif drivers
+CMDS=<<EOF
+sarif list drivers
+sarif load examples/driver.sarif.json
+EOF
+EXPECT_ERR=
 RUN

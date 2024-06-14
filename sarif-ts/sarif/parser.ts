@@ -23,7 +23,14 @@ export class SarifParser {
     }
 
     public parseDriver(sarifString: string) : SarifDocument | Error {
-        return new Error("Not implemented");
+        const driverObject = JSON.parse(sarifString);
+        const doc : SarifDocument = {
+            version: "2.1.0",
+            runs: [{
+                "tool": driverObject
+            }]
+        };
+        return this.parseDocument(JSON.stringify(doc));
     }
 
     private validateSarif(sarifDoc: SarifDocument): Error | undefined {
@@ -36,13 +43,14 @@ export class SarifParser {
             if (!run.tool || !run.tool.driver || !run.tool.driver.name || !run.tool.driver.version) {
                 return new Error("SARIF run missing required tool information");
             }
-
-            run.results.forEach((result) => {
-                if (!result.level || !result.message) {
-                    return new Error("SARIF result missing required level or message");
-                }
-                // You can add more specific checks for location format (optional)
-            });
+            if (run.results) {
+                run.results.forEach((result) => {
+                    if (!result.level || !result.message) {
+                        return new Error("SARIF result missing required level or message");
+                    }
+                    // You can add more specific checks for location format (optional)
+                });
+            }
         });
     }
 }
