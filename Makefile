@@ -6,9 +6,12 @@ all: sarif.r2.js
 r2: sarif.r2.js
 	r2 -i sarif.r2.js /bin/ls
 
-sarif.r2.js: sarif-ts/plugin.r2.ts
-	cd sarif-ts/sarif && R2PM_OFFLINE=1 r2pm -r r2frida-compile -o types.js types.ts
-	cd sarif-ts && R2PM_OFFLINE=1 r2pm -r r2frida-compile -o ../sarif.r2.js plugin.r2.ts
+vs:
+	open -a "Visual Studio Code" .
+
+sarif.r2.js: src/plugin.r2.ts
+	cd src/sarif && R2PM_OFFLINE=1 r2pm -r r2frida-compile -o types.js types.ts
+	cd src && R2PM_OFFLINE=1 r2pm -r r2frida-compile -o ../sarif.r2.js plugin.r2.ts
 
 test:
 	R2R_OFFLINE=1 r2r -i test/db

@@ -20,8 +20,6 @@ export const sarifRadareTemplate = {
   ]
 };
 
-
-// TODO: move into utils
 export const sarifTemplate = {
   $schema: 'http://json.schemastore.org/sarif-' + sarifSchemeVersion,
   version: sarifSchemeVersion,

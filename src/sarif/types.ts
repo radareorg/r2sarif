@@ -9,6 +9,7 @@ export interface Result {
     message: ResultMessage;
     locations: Location[]; // (optional) file, line, column information
     relatedLocations?: Location[]; // (optional) additional locations
+    properties?: any;
 }
 
 // it's ugly that typescript can't enforce this at the language level

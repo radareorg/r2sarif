@@ -1,7 +1,7 @@
-import { SarifGenerator, SarifRun } from "./sarif/generator.js";
-import { SarifParser } from "./sarif/parser.js"
 import { SarifDocument,  Driver, BinaryLocation, ResultLevel, Rule, Result, isValidLevel } from "./sarif/types.js";
+import { SarifGenerator, SarifRun } from "./sarif/generator.js";
 import { tabulateText } from "./sarif/utilsgen.js";
+import { SarifParser } from "./sarif/parser.js"
 
 const pluginName = "sarif";
 const pluginVersion = "0.0.1";
@@ -27,24 +27,13 @@ function readFileSync(fileName: string): string | Error {
     }
 }
 
-const sarifTemplate = {
-    $schema: 'http://json.schemastore.org/sarif-2.1.0',
-    version: '2.1.0',
-    runs: [
-        {
-            tool: {
-                driver: {
-                    name: 'radare2',
-                    version: r2.cmd("?Vq").trim(),
-                    rules: [
-                    ]
-                }
-            },
-            results: [
-            ]
-        }
-    ]
-};
+const sarifListHelp = `sarif list [type]  # see 'sarif select'
+| json      merge and dump all sarif documents together in json format
+| docs      list all loaded documents
+| rules     list rules from all documents or the selected one
+| drivers   list all drivers available
+| results   list all the results/findings from loaded documents
+`.trim();
 
 class R2Sarif {
     version: string = pluginVersion;
@@ -66,13 +55,13 @@ class R2Sarif {
         try {
             const res = this.sf.parse("{}");
             if (res instanceof Error) {
-                console.error("Cannot parse this sarif document");
-                console.error(res);
+                r2.error("Cannot parse this sarif document");
+                r2.error(res.toString());
             } else {
-                console.error("ok");
+                r2.error("ok");
             }
         } catch (err) {
-            console.error(err);
+            r2.error(err);
         }
     }
 
@@ -97,15 +86,30 @@ class R2Sarif {
         return true;
     }
 
-    toScript() : string {
-        const script : string[] = [];
-        script.push("# SARIF script for radare2");
-        const s = this.currentDocument.getSarif();
-        if (s instanceof Error) {
-            console.error(s);
+    toString() : string {
+        const sarif = this.currentDocument.getSarif();
+        if (sarif instanceof Error) {
+            r2.error(sarif.toString());
             return "";
         }
-        s.runs.forEach((run) => {
+        return JSON.stringify(sarif, null, 2);
+    }
+
+    toScript() : string {
+        const sarif = this.currentDocument.getSarif();
+        if (sarif instanceof Error) {
+            r2.error(sarif.toString());
+            return "";
+        }
+        const s = this.currentDocument.getSarif();
+        if (s instanceof Error) {
+            r2.error(s.toString());
+            return "";
+        }
+        const script : string[] = [];
+        script.push("# SARIF script for radare2");
+        let counter = 0;
+        for (const run of s.runs) {
             if (run.results) {
                 run.results.forEach((res) => {
                     // script.push(JSON.stringify(res, null, 4));
@@ -116,15 +120,21 @@ class R2Sarif {
                             const addr = bloc.properties.memoryAddress;
                             const size = bloc.physicalLocation.region.byteLength;
                             const rule = res.ruleId;
-                            const text = res.message.text;
-                            script.push(`CC ${rule}:${text} @ ${addr}\n`);
+                            let text;
+                            if (res && res.properties && res.properties.additionalProperties) {
+                                text = res.properties.additionalProperties.value;
+                            } else {
+                                text = res.message.text;
+                            }
                             const at = r2.cmd(`?v ${addr}`).trim();
-                            script.push(`# ${text} @ ${at} / ${size} ${rule}\n`);
+                            script.push(`# ${text} @ ${at} / ${size} ${rule}`);
+                            script.push(`CC ${rule}:${text} @ ${at}`); // encode in base64
+                            script.push(`f sarif.${counter} ${size} ${at}`);
                         }
                     }
                 });
             }
-        });
+        }
         return script.join("\n");
         /*
       let script = '# r2sarif script\n';
@@ -160,7 +170,6 @@ class R2Sarif {
       */
     }
     loadSarif(args: string[]) : boolean {
-        // load this stuff in here
         if (args.length === 1) {
             const [fileName] = args;
             const data = readFileSync(fileName)
@@ -193,9 +202,10 @@ class R2Sarif {
             this.currentDriverIndex = index;
             r2.log("Selected driver:")
             this.listDriver(index, this.currentDriver);
+            this.currentDocument.selectDriver(this.currentDriver);
             return true;
         }
-        console.error("Invalid index. Run: sarif list drivers");
+        r2.error("Invalid index. Run: sarif list drivers");
         return false;
     }
 
@@ -291,26 +301,61 @@ class R2Sarif {
 
     add(level: ResultLevel, ruleId: string, messageText: string) : boolean{
         if (this.currentDriver === null) {
-            console.error("No driver selected");
+            r2.error("No driver selected");
             return false;
         }
         const rules = this.listRulesForDriver(this.currentDriver);
         for (const rule of rules) {
             if (rule.id === ruleId) {
-                const result = {
+                const result : Result = {
                     ruleId: ruleId,
                     message: {
                         text: messageText
                     },
-                    level: level
+                    level: level,
+                    locations: []
+                };
+                const loc : BinaryLocation = {
+                    physicalLocation: {
+                        artifactLocation: {
+                            uri: "binary://example-binary",
+                            uriBaseId: "%SRCROOT%"
+                        },
+                        region: {
+                            byteOffset: 1024,
+                            byteLength: 128
+                        }
+                    },
+                    properties: {
+                        memoryAddress: "123"
+                    }
                 }
+                result.locations.push(loc);
+                this.currentDocument.addResult(result);
                 // this.currentRun = this.currentDocument.appendRun(this.currentDriver.name, this.currentDriver.version);
                 // this.currentDriver.rules.push(rule);
                 // this.currentDriver.rules.push(result);
+                /*
+                            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "binary://example-binary",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "byteOffset": 1024,
+                  "byteLength": 128
+                }
+              },
+              "properties": {
+                "memoryAddress": "0x0040321A"
+              }
+            }
+
+            */
                 return true;
             }
         }
-        r2.log("TODO ADD");
         return true;
     }
 }
@@ -329,7 +374,7 @@ sarif reset             - unload all documents
 sarif select [N]        - select the nth driver
 sarif unload [N]        - unload the nth document
 sarif version           - show plugin version
-`);
+`.trim());
 }
 
 function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
@@ -350,7 +395,7 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
             break;
         case "-a":
         case "add":
-            if (args.length === 5) {
+            if (args.length >= 4) {
                 const levelType = args[1];
                 const ruleId = args[2];
                 const textMessage = args.slice(3).join (" ");
@@ -360,12 +405,11 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
             } else {
                 r2.log("sarif add [type] [id] [message]")
                 r2.log("type = warning, error, note")
-                //showHelp();
             }
             break;
         case 'addw':
         case '-aw':
-            if (args.length === 4) {
+            if (args.length === 3) {
                 const ruleId = args[1];
                 const textMessage = args.slice(2).join (" ");
                 r2s.add("warning", ruleId, textMessage);
@@ -375,7 +419,7 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
             break;
         case 'adde':
         case '-ae':
-            if (args.length === 4) {
+            if (args.length === 3) {
                 const ruleId = args[1];
                 const textMessage = args.slice(2).join (" ");
                 r2s.add("error", ruleId, textMessage);
@@ -385,7 +429,7 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
             break;
         case 'addn':
         case '-an':
-            if (args.length === 4) {
+            if (args.length === 3) {
                 const ruleId = args[1];
                 const textMessage = args.slice(2).join (" ");
                 r2s.add("note", ruleId, textMessage);
@@ -429,6 +473,7 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
                 const arg = args[1];
                 switch (arg) {
                 case "-R":
+                case "rul":
                 case "rules":
                     r2s.listRules();
                     break;
@@ -442,6 +487,7 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
                     r2s.listResults();
                     break;
                 case "-d":
+                case "drv":
                 case "drivers":
                     r2s.listDrivers();
                     break;
@@ -449,11 +495,11 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
                     r2s.listDocs();
                     break;
                 default:
-                    r2.log("sarif list [json|docs|rules|drivers|results]")
+                    r2.log(sarifListHelp);
                     break;
                 }
             } else {
-                r2.log("sarif list [json|docs|rules|drivers|results]")
+                r2.log(sarifListHelp);
             }
             break;
         case '-i':
@@ -486,8 +532,8 @@ function registerSarifPlugin() {
             try {
                 return sarifCommand(r2s, cmd);
             } catch (e) {
-                console.error(e.stack);
-                console.error(e);
+                r2.error(e.stack);
+                r2.error(e);
             }
         }
         return {
@@ -502,6 +548,6 @@ function registerSarifPlugin() {
 try {
     registerSarifPlugin();
 } catch (e) {
-    console.error(e);
-    console.error(e.stack);
+    r2.error(e);
+    r2.error(e.stack);
 }
