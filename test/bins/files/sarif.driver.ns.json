@@ -1,0 +1,55 @@
+{
+  "driver": {
+    "name": "SARIF Findings",
+    "product": "Platform",
+    "semanticVersion": "0.0.1",
+    "rules": [
+      {
+        "id": "SF00001",
+        "deprecatedIds": [
+          "unprotected_context_registered_broadcast_receivers"
+        ],
+        "name": "Context Registered Broadcast Receivers Not Protected with Permissions",
+        "defaultConfiguration": {
+          "level": "error"
+        },
+        "properties": {
+          "security-severity": "4",
+          "security-severity-vector": "CVSS:3.0/AV:L/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+          "tags": [
+            "security"
+          ]
+        }
+      },
+      {
+        "id": "SF00002",
+        "deprecatedIds": [
+          "unprotected_manifest_broadcast_receivers"
+        ],
+        "name": "Manifest Declared Broadcast Receivers Not Protected With Permissions Can Leak Data to Other Apps",
+        "defaultConfiguration": {
+          "level": "error"
+        },
+        "properties": {
+          "security-severity": "4",
+          "security-severity-vector": "CVSS:3.0/AV:L/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+          "tags": [
+            "security"
+          ]
+        }
+      },
+      {
+        "id": "SF00003",
+        "deprecatedIds": [
+          "exported_components"
+        ],
+        "name": "Implicitly Exported Components Block Installation to Android 12",
+        "defaultConfiguration": {
+          "level": "note"
+        }
+      }
+    ],
+    "isComprehensive": true,
+    "language": "en"
+  }
+}

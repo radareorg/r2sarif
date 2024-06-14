@@ -1,6 +1,6 @@
 NAME=sarif world
 FILE=-
-ARGS=-i ../sarif-ts/plugin.r2.js
+ARGS=-i ../sarif.r2.js
 CMDS=<<EOF
 ?e hello sarif
 ?ee error message
@@ -15,7 +15,7 @@ RUN
 
 NAME=sarif help
 FILE=-
-ARGS=-i ../sarif-ts/plugin.r2.js
+ARGS=-i ../sarif.r2.js
 CMDS=<<EOF
 sarif help
 EOF
@@ -36,19 +36,61 @@ sarif version           - show plugin version
 EOF
 RUN
 
-NAME=sarif load
+NAME=sarif load document
+ARGS=-i ../sarif.r2.js
 CMDS=<<EOF
-pwd
-sarif load examples/driver.sarif.json
+sarif load bins/files/sarif.rules.mastg.json
 sarif list docs
+EOF
+EXPECT=<<EOF
+Document loaded. Use 'sarif list'
+0 bins/files/sarif.rules.mastg.json
+ + mastg 1.0.0
 EOF
 EXPECT_ERR=
 RUN
 
 NAME=sarif drivers
+ARGS=-i ../sarif.r2.js
 CMDS=<<EOF
 sarif list drivers
-sarif load examples/driver.sarif.json
+sarif load bins/files/sarif.driver.ns.json
+?e ---
+?e drivers
+sarif list drivers
+?e ---
+?e docs
+sarif list docs
+?e ---
+?e rules
+sarif list rules
+EOF
+EXPECT=<<EOF
+---
+drivers
+---
+docs
+---
+rules
+SF00001             Context Registered Broadcast Receivers Not Protected with Permissions
+SF00002             Manifest Declared Broadcast Receivers Not Protected With Permissions Can Leak Data to Other Apps
+SF00003             Implicitly Exported Components Block Installation to Android 12
+Document loaded. Use 'sarif list'
+   0 SARIF Findings 0.0.1
+0 bins/files/sarif.driver.ns.json
+ + SARIF Findings 0.0.1
+# Rules for Driver: SARIF Findings (0.0.1)
 EOF
 EXPECT_ERR=
+RUN
+
+NAME=sarif version
+FILE=-
+ARGS=-i ../sarif.r2.js
+CMDS=<<EOF
+sarif version
+EOF
+EXPECT=<<EOF
+0.0.1
+EOF
 RUN
