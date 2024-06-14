@@ -53,7 +53,7 @@ jobs:
     - name: Building
       run: make
     - name: Running tests
-      run: r2r test/db
+      run: make citest
 # do not upload twice
 #    - uses: actions/upload-artifact@v4
 #      with:

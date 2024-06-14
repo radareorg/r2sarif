@@ -13,6 +13,9 @@ sarif.r2.js: sarif-ts/plugin.r2.ts
 test:
 	R2R_OFFLINE=1 r2r -i test/db
 
+citest:
+	R2R_OFFLINE=1 r2r test/db
+
 user-install: sarif.r2.js
 	mkdir -p $(PLUGDIR)
 	rm -f $(PLUGDIR)/sarif.r2.js

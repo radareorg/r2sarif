@@ -43,11 +43,12 @@ sarif load bins/files/sarif.rules.mastg.json
 sarif list docs
 EOF
 EXPECT=<<EOF
-Document loaded. Use 'sarif list'
 0 bins/files/sarif.rules.mastg.json
  + mastg 1.0.0
 EOF
-EXPECT_ERR=
+EXPECT_ERR=<<EOF
+Document loaded. Use 'sarif list'
+EOF
 RUN
 
 NAME=sarif drivers
@@ -68,20 +69,20 @@ EOF
 EXPECT=<<EOF
 ---
 drivers
+  0   SARIF Findings      0.0.1
 ---
 docs
+0 bins/files/sarif.driver.ns.json
+ + SARIF Findings 0.0.1
 ---
 rules
 SF00001             Context Registered Broadcast Receivers Not Protected with Permissions
 SF00002             Manifest Declared Broadcast Receivers Not Protected With Permissions Can Leak Data to Other Apps
 SF00003             Implicitly Exported Components Block Installation to Android 12
-Document loaded. Use 'sarif list'
-   0 SARIF Findings 0.0.1
-0 bins/files/sarif.driver.ns.json
- + SARIF Findings 0.0.1
-# Rules for Driver: SARIF Findings (0.0.1)
 EOF
-EXPECT_ERR=
+EXPECT_ERR=<<EOF
+Document loaded. Use 'sarif list'
+EOF
 RUN
 
 NAME=sarif version

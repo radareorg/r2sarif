@@ -1,5 +1,4 @@
-import { readFileSync } from "fs";
-import { verifySarif } from "../sarif/utils.js";
+import { verifySarif, readFileSync } from "../sarif/utilsverify.js";
 
 const data: any = JSON.parse(readFileSync("test-sarif.json", "utf-8"));
 const result = verifySarif(data);

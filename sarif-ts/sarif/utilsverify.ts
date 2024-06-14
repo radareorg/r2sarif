@@ -2,7 +2,7 @@
 
 import { SourceLineLocation, SourceLocation, BinaryLocation } from "./types";
 
-import { readFileSync } from "fs";
+import { readFileSync as rfs } from "fs";
 import { Ajv2020, ErrorObject, ValidateFunction } from "ajv/dist/2020"
 import ajv from "ajv"
 import addFormats from "ajv-formats";
@@ -11,6 +11,8 @@ import addFormats from "ajv-formats";
 // const sarifSchemaJson = "sarif-schema-2.1.0.json";
 const sarifSchema210 = "sarif-schema-2.1.0.json";
 const sarifSchema220 = "sarif-schema-2.2.0.json";
+
+export const readFileSync = rfs;
 
 export class SarifVerifier {
     private validateDocument: ValidateFunction;

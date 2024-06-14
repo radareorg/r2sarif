@@ -39,5 +39,5 @@ export function tabulateText(columns: string[], columnWidths: number[]) : string
         const columnWidth = columnWidths[col++];
         resultingText += column.padEnd(columnWidth);
     }
-    return resultingText;
+    return resultingText.replace(/\s+$/, '');
 }
