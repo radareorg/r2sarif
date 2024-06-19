@@ -17,11 +17,13 @@ sarif add warning ojhow jaslkf
 EOF
 EXPECT=<<EOF
 -- add 1 bad arg
-sarif add [type] [id] [message]
+sarif add [type] [kind] [id] [message]
 type = warning, error, note
+kind = notApplicable, pass, fail, review, open, informational
 -- add 2 bad args
-sarif add [type] [id] [message]
+sarif add [type] [kind] [id] [message]
 type = warning, error, note
+kind = notApplicable, pass, fail, review, open, informational
 -- add 3 bad args
 sarif add requires a level: warning, error or note as first argument
 -- add 3 bad id
@@ -103,6 +105,7 @@ f sarif.0 256 0x0
           "message": {
             "text": "this is not ok"
           },
+          "kind": "fail",
           "level": "warning",
           "locations": [
             {
