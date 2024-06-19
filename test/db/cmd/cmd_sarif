@@ -42,11 +42,13 @@ sarif load bins/files/sarif.rules.mastg.json
 sarif list docs
 EOF
 EXPECT=<<EOF
+Selected driver:
+* 0   mastg               1.0.0
 0 bins/files/sarif.rules.mastg.json
  + mastg 1.0.0
 EOF
 EXPECT_ERR=<<EOF
-Document loaded. Use 'sarif list'
+Document loaded and driver selected. Use 'sarif list'
 EOF
 RUN
 
@@ -66,9 +68,11 @@ sarif list docs
 sarif list rules
 EOF
 EXPECT=<<EOF
+Selected driver:
+* 0   SARIF Findings      0.0.1
 ---
 drivers
-  0   SARIF Findings      0.0.1
+* 0   SARIF Findings      0.0.1
 ---
 docs
 0 bins/files/sarif.driver.ns.json
@@ -80,7 +84,7 @@ SF00002             Manifest Declared Broadcast Receivers Not Protected With Per
 SF00003             Implicitly Exported Components Block Installation to Android 12
 EOF
 EXPECT_ERR=<<EOF
-Document loaded. Use 'sarif list'
+Document loaded and driver selected. Use 'sarif list'
 EOF
 RUN
 

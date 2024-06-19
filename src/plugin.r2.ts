@@ -1,4 +1,4 @@
-import { SarifDocument,  Driver, ResultKind, BinaryLocation, ResultLevel, Rule, Result, isValidLevel } from "./sarif/types.js";
+import { SarifDocument, Driver, ResultKind, BinaryLocation, ResultLevel, Rule, Result, isValidLevel } from "./sarif/types.js";
 import { SarifGenerator, SarifRun } from "./sarif/generator.js";
 import { tabulateText } from "./sarif/utilsgen.js";
 import { SarifParser } from "./sarif/parser.js"
@@ -65,11 +65,11 @@ class R2Sarif {
         }
     }
 
-    unloadSarif(args: string[]) : boolean {
+    unloadSarif(args: string[]): boolean {
         if (args.length === 1) {
             const documentIndex = parseInt(args[0]);
-            let newDocs : SarifDocument[]= [];
-            let newPaths : string[] = [];
+            let newDocs: SarifDocument[] = [];
+            let newPaths: string[] = [];
             let count = 0;
             for (const doc of this.docs) {
                 if (count++ === documentIndex) {
@@ -86,7 +86,7 @@ class R2Sarif {
         return true;
     }
 
-    toString() : string {
+    toString(): string {
         const sarif = this.currentDocument.getSarif();
         if (sarif instanceof Error) {
             r2.error(sarif.toString());
@@ -95,7 +95,7 @@ class R2Sarif {
         return JSON.stringify(sarif, null, 2);
     }
 
-    toScript() : string {
+    toScript(): string {
         const sarif = this.currentDocument.getSarif();
         if (sarif instanceof Error) {
             r2.error(sarif.toString());
@@ -106,7 +106,7 @@ class R2Sarif {
             r2.error(s.toString());
             return "";
         }
-        const script : string[] = [];
+        const script: string[] = [];
         script.push("# SARIF script for radare2");
         let counter = 0;
         for (const run of s.runs) {
@@ -156,10 +156,10 @@ class R2Sarif {
           script += `# ${text} @ ${addr}\n`;
           // TODO: detect when there are two comments in the same address
           if (res.ruleId === 'COMMENTS') {
-	  const comment = `${text}`;
+      const comment = `${text}`;
             script += `CC ${comment} @ ${address}\n`;
           } else {
-	  const comment = `${ruleId}:${text}`;
+      const comment = `${ruleId}:${text}`;
             script += `CC ${comment} @ ${address}\n`;
             script += `f sarif.${counter} ${size} ${address}\n`;
           }
@@ -169,7 +169,7 @@ class R2Sarif {
       return script;
       */
     }
-    loadSarif(args: string[]) : boolean {
+    loadSarif(args: string[]): boolean {
         if (args.length === 1) {
             const [fileName] = args;
             const data = readFileSync(fileName)
@@ -179,18 +179,19 @@ class R2Sarif {
             }
             const doc = this.sf.parse(data);
             if (doc instanceof Error) {
-                r2.error("Error parsing "+ doc);
+                r2.error("Error parsing " + doc);
                 return false;
             }
             this.docs.push(doc);
             this.paths.push(fileName);
-            r2.error("Document loaded. Use 'sarif list'")
+            this.selectDriver(this.listDrivers(true).length - 1);
+            r2.error("Document loaded and driver selected. Use 'sarif list'")
         } else {
             r2.error("Usage: sarif load <sarif file>");
         }
         return true;
     }
-    selectDriver(index: number) : boolean {
+    selectDriver(index: number): boolean {
         if (index === -1) {
             this.currentDriverIndex = -1;
             this.currentDriver = null;
@@ -210,10 +211,10 @@ class R2Sarif {
     }
 
     listDriver(index: number, driver: Driver) {
-          const sel = (index === this.currentDriverIndex)? "* ": "  ";
-          const ver = driver.semanticVersion? driver.semanticVersion: driver.version? driver.version: ""
-          const text = tabulateText([sel, index.toString(), driver.name, ver], [2, 4, 20, 20]);
-          r2.log(text);
+        const sel = (index === this.currentDriverIndex) ? "* " : "  ";
+        const ver = driver.semanticVersion ? driver.semanticVersion : driver.version ? driver.version : ""
+        const text = tabulateText([sel, index.toString(), driver.name, ver], [2, 4, 20, 20]);
+        r2.log(text);
     }
 
     listDocs() {
@@ -228,16 +229,16 @@ class R2Sarif {
         }
     }
 
-    listDrivers(silent?: boolean) : Driver[] {
-        var res : Driver[] = [];
+    listDrivers(silent?: boolean): Driver[] {
+        var res: Driver[] = [];
         let count = 0;
         for (const doc of this.docs) {
             for (const run of doc.runs) {
                 const driver = run.tool.driver;
                 const driverCount = count++;
-		if (!silent) {
+                if (!silent) {
                     this.listDriver(driverCount, driver);
-		}
+                }
                 res.push(driver);
             }
         }
@@ -248,15 +249,15 @@ class R2Sarif {
             r2.log(JSON.stringify(doc));
         }
     }
-    listResults() : Result[] {
-        var res : Result[]= [];
+    listResults(): Result[] {
+        var res: Result[] = [];
         for (const doc of this.docs) {
             for (const run of doc.runs) {
                 if (run.results) {
-                for (const res of run.results) {
-                    r2.log(res.ruleId)
+                    for (const res of run.results) {
+                        r2.log(res.ruleId)
+                    }
                 }
-            }
             }
         }
         return res;
@@ -265,27 +266,27 @@ class R2Sarif {
         const text = (rule.shortDescription
             ? rule.shortDescription.text
             : rule.fullDescription
-            ? rule.fullDescription.text
-            : rule.name
-            ? rule.name: "");
-        const line = tabulateText([rule.id, text],[20, 40]);
+                ? rule.fullDescription.text
+                : rule.name
+                    ? rule.name : "");
+        const line = tabulateText([rule.id, text], [20, 40]);
         r2.log(line);
     }
-    listRulesForDriver(driver: Driver, quiet?: boolean) : Rule[] {
-	    if (quiet === true) {
-		    return driver.rules;
-	    }
+    listRulesForDriver(driver: Driver, quiet?: boolean): Rule[] {
+        if (quiet === true) {
+            return driver.rules;
+        }
         // r2.log("# Rules for Driver: " + driver.name + " (" + driver.semanticVersion + ")")
         for (const rule of driver.rules) {
             this.listRule(rule);
         }
         return driver.rules;
     }
-    listRules() : Rule[] {
+    listRules(): Rule[] {
         if (this.currentDriver !== null) {
             return this.listRulesForDriver(this.currentDriver);
         }
-        var res :Rule[] = [];
+        var res: Rule[] = [];
         for (const doc of this.docs) {
             for (const run of doc.runs) {
                 const driver = run.tool.driver;
@@ -302,19 +303,19 @@ class R2Sarif {
         this.currentDriverIndex = -1;
     }
 
-    add(level: ResultLevel, kind: ResultKind, ruleId: string, messageText: string) : boolean{
+    add(level: ResultLevel, kind: ResultKind, ruleId: string, messageText: string): boolean {
         if (this.currentDriver === null) {
             r2.log("No driver selected");
             return false;
         }
         const rules = this.listRulesForDriver(this.currentDriver);
-	const pa = Number(r2.cmd("?p $$"));
-	const va = r2.cmd("?v $$").trim();
-	const sz = Number(r2.cmd("b"));
-	const fileName = r2.cmd("o.").trim();
+        const pa = Number(r2.cmd("?p $$"));
+        const va = r2.cmd("?v $$").trim();
+        const sz = Number(r2.cmd("b"));
+        const fileName = r2.cmd("o.").trim();
         for (const rule of rules) {
             if (rule.id === ruleId) {
-                const result : Result = {
+                const result: Result = {
                     ruleId: ruleId,
                     message: {
                         text: messageText
@@ -323,7 +324,7 @@ class R2Sarif {
                     level: level,
                     locations: []
                 };
-                const loc : BinaryLocation = {
+                const loc: BinaryLocation = {
                     physicalLocation: {
                         artifactLocation: {
                             uri: "binary://" + fileName,
@@ -407,12 +408,12 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
                 const levelType = args[1];
                 const ruleId = args[2];
                 const kind = "fail";
-                const textMessage = args.slice(3).join (" ");
+                const textMessage = args.slice(3).join(" ");
                 if (isValidLevel(levelType)) {
                     r2s.add(levelType, kind, ruleId, textMessage);
                 } else {
                     r2.log("sarif add requires a level: warning, error or note as first argument")
-		}
+                }
             } else {
                 r2.log("sarif add [type] [kind] [id] [message]")
                 r2.log("type = warning, error, note")
@@ -424,7 +425,7 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
             if (args.length === 3) {
                 const ruleId = args[1];
                 const kind = "fail";
-                const textMessage = args.slice(2).join (" ");
+                const textMessage = args.slice(2).join(" ");
                 r2s.add("warning", kind, ruleId, textMessage);
             } else {
                 r2.error("sarif addw [id] [message]")
@@ -434,7 +435,7 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
         case '-ae':
             if (args.length === 3) {
                 const ruleId = args[1];
-                const textMessage = args.slice(2).join (" ");
+                const textMessage = args.slice(2).join(" ");
                 const kind = "fail";
                 r2s.add("error", kind, ruleId, textMessage);
             } else {
@@ -446,7 +447,7 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
             if (args.length === 3) {
                 const ruleId = args[1];
                 const kind = "fail";
-                const textMessage = args.slice(2).join (" ");
+                const textMessage = args.slice(2).join(" ");
                 r2s.add("note", kind, ruleId, textMessage);
             } else {
                 r2.log("sarif addn [id] [message]")
@@ -487,31 +488,31 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
             if (args.length === 2) {
                 const arg = args[1];
                 switch (arg) {
-                case "-R":
-                case "rul":
-                case "rules":
-                    r2s.listRules();
-                    break;
-                case "-j":
-                case "json":
-                    r2s.listJson();
-                    break;
-                case "-r":
-                case "res":
-                case "results":
-                    r2s.listResults();
-                    break;
-                case "-d":
-                case "drv":
-                case "drivers":
-                    r2s.listDrivers();
-                    break;
-                case "docs":
-                    r2s.listDocs();
-                    break;
-                default:
-                    r2.log(sarifListHelp);
-                    break;
+                    case "-R":
+                    case "rul":
+                    case "rules":
+                        r2s.listRules();
+                        break;
+                    case "-j":
+                    case "json":
+                        r2s.listJson();
+                        break;
+                    case "-r":
+                    case "res":
+                    case "results":
+                        r2s.listResults();
+                        break;
+                    case "-d":
+                    case "drv":
+                    case "drivers":
+                        r2s.listDrivers();
+                        break;
+                    case "docs":
+                        r2s.listDocs();
+                        break;
+                    default:
+                        r2.log(sarifListHelp);
+                        break;
                 }
             } else {
                 r2.log(sarifListHelp);
@@ -541,7 +542,7 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
 
 function registerSarifPlugin() {
     r2.unload("core", pluginName);
-    r2.plugin("core", function() {
+    r2.plugin("core", function () {
         const r2s = new R2Sarif();
         function coreCall(cmd: string) {
             try {

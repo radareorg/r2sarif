@@ -31,12 +31,14 @@ No driver selected
 -- add 3 invalid id
 Selected driver:
 * 0   SARIF Findings      0.0.1
+Selected driver:
+* 0   SARIF Findings      0.0.1
 SF00001             Context Registered Broadcast Receivers Not Protected with Permissions
 SF00002             Manifest Declared Broadcast Receivers Not Protected With Permissions Can Leak Data to Other Apps
 SF00003             Implicitly Exported Components Block Installation to Android 12
 EOF
 EXPECT_ERR=<<EOF
-Document loaded. Use 'sarif list'
+Document loaded and driver selected. Use 'sarif list'
 EOF
 RUN
 
@@ -54,6 +56,8 @@ sarif r2
 sarif dump
 EOF
 EXPECT=<<EOF
+Selected driver:
+* 0   SARIF Findings      0.0.1
 Selected driver:
 * 0   SARIF Findings      0.0.1
 SF00001             Context Registered Broadcast Receivers Not Protected with Permissions
@@ -131,6 +135,6 @@ f sarif.0 256 0x0
 }
 EOF
 EXPECT_ERR=<<EOF
-Document loaded. Use 'sarif list'
+Document loaded and driver selected. Use 'sarif list'
 EOF
 RUN
