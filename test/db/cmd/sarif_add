@@ -23,7 +23,7 @@ type = warning, error, note
 sarif add [type] [id] [message]
 type = warning, error, note
 -- add 3 bad args
-sarif add rqeuites: warning, error or note as first argument
+sarif add requires a level: warning, error or note as first argument
 -- add 3 bad id
 No driver selected
 -- add 3 invalid id
@@ -63,9 +63,9 @@ SF00002             Manifest Declared Broadcast Receivers Not Protected With Per
 SF00003             Implicitly Exported Components Block Installation to Android 12
 --- sarif r2
 # SARIF script for radare2
-# this is not ok @ 0x7b / 128 SF00001
-CC SF00001:this is not ok @ 0x7b
-f sarif.0 128 0x7b
+# this is not ok @ 0x0 / 256 SF00001
+CC SF00001:this is not ok @ 0x0
+f sarif.0 256 0x0
 --- sarif dump
 {
   "$schema": "http://json.schemastore.org/sarif-2.1.0",
@@ -108,16 +108,16 @@ f sarif.0 128 0x7b
             {
               "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "binary://example-binary",
+                  "uri": "binary://malloc://512",
                   "uriBaseId": "%SRCROOT%"
                 },
                 "region": {
-                  "byteOffset": 1024,
-                  "byteLength": 128
+                  "byteOffset": 0,
+                  "byteLength": 256
                 }
               },
               "properties": {
-                "memoryAddress": "123"
+                "memoryAddress": "0x0"
               }
             }
           ]

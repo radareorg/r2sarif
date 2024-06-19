@@ -307,6 +307,10 @@ class R2Sarif {
             return false;
         }
         const rules = this.listRulesForDriver(this.currentDriver);
+	const pa = Number(r2.cmd("?p $$"));
+	const va = r2.cmd("?v $$").trim();
+	const sz = Number(r2.cmd("b"));
+	const fileName = r2.cmd("o.").trim();
         for (const rule of rules) {
             if (rule.id === ruleId) {
                 const result : Result = {
@@ -320,16 +324,16 @@ class R2Sarif {
                 const loc : BinaryLocation = {
                     physicalLocation: {
                         artifactLocation: {
-                            uri: "binary://example-binary",
+                            uri: "binary://" + fileName,
                             uriBaseId: "%SRCROOT%"
                         },
                         region: {
-                            byteOffset: 1024,
-                            byteLength: 128
+                            byteOffset: pa,
+                            byteLength: sz
                         }
                     },
                     properties: {
-                        memoryAddress: "123"
+                        memoryAddress: va.toString()
                     }
                 }
                 result.locations.push(loc);
@@ -404,7 +408,7 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
                 if (isValidLevel(levelType)) {
                     r2s.add(levelType, ruleId, textMessage);
                 } else {
-                    r2.log("sarif add rqeuites: warning, error or note as first argument")
+                    r2.log("sarif add requires a level: warning, error or note as first argument")
 		}
             } else {
                 r2.log("sarif add [type] [id] [message]")
