@@ -19,7 +19,7 @@ export class SarifRun {
 }
 
 function newResult(level: ResultLevel, ruleId: string, message: string, location: Location): Result {
-    return { level: "error", ruleId: ruleId, "message": { text: message }, locations: [location] };
+    return { level: level, kind: "pass", ruleId: ruleId, "message": { text: message }, locations: [location] };
 }
 
 export class SarifGenerator {

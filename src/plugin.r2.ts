@@ -1,4 +1,4 @@
-import { SarifDocument,  Driver, BinaryLocation, ResultLevel, Rule, Result, isValidLevel } from "./sarif/types.js";
+import { SarifDocument,  Driver, ResultKind, BinaryLocation, ResultLevel, Rule, Result, isValidLevel } from "./sarif/types.js";
 import { SarifGenerator, SarifRun } from "./sarif/generator.js";
 import { tabulateText } from "./sarif/utilsgen.js";
 import { SarifParser } from "./sarif/parser.js"
@@ -271,14 +271,15 @@ class R2Sarif {
         const line = tabulateText([rule.id, text],[20, 40]);
         r2.log(line);
     }
-    listRulesForDriver(driver: Driver) : Rule[] {
-        var res: Rule[] = [];
+    listRulesForDriver(driver: Driver, quiet?: boolean) : Rule[] {
+	    if (quiet === true) {
+		    return driver.rules;
+	    }
         // r2.log("# Rules for Driver: " + driver.name + " (" + driver.semanticVersion + ")")
         for (const rule of driver.rules) {
             this.listRule(rule);
-            res.push(rule);
         }
-        return res;
+        return driver.rules;
     }
     listRules() : Rule[] {
         if (this.currentDriver !== null) {
@@ -301,7 +302,7 @@ class R2Sarif {
         this.currentDriverIndex = -1;
     }
 
-    add(level: ResultLevel, ruleId: string, messageText: string) : boolean{
+    add(level: ResultLevel, kind: ResultKind, ruleId: string, messageText: string) : boolean{
         if (this.currentDriver === null) {
             r2.log("No driver selected");
             return false;
@@ -318,6 +319,7 @@ class R2Sarif {
                     message: {
                         text: messageText
                     },
+                    kind: kind,
                     level: level,
                     locations: []
                 };
@@ -404,23 +406,26 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
             if (args.length >= 4) {
                 const levelType = args[1];
                 const ruleId = args[2];
+                const kind = "fail";
                 const textMessage = args.slice(3).join (" ");
                 if (isValidLevel(levelType)) {
-                    r2s.add(levelType, ruleId, textMessage);
+                    r2s.add(levelType, kind, ruleId, textMessage);
                 } else {
                     r2.log("sarif add requires a level: warning, error or note as first argument")
 		}
             } else {
-                r2.log("sarif add [type] [id] [message]")
+                r2.log("sarif add [type] [kind] [id] [message]")
                 r2.log("type = warning, error, note")
+                r2.log("kind = notApplicable, pass, fail, review, open, informational");
             }
             break;
         case 'addw':
         case '-aw':
             if (args.length === 3) {
                 const ruleId = args[1];
+                const kind = "fail";
                 const textMessage = args.slice(2).join (" ");
-                r2s.add("warning", ruleId, textMessage);
+                r2s.add("warning", kind, ruleId, textMessage);
             } else {
                 r2.error("sarif addw [id] [message]")
             }
@@ -430,7 +435,8 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
             if (args.length === 3) {
                 const ruleId = args[1];
                 const textMessage = args.slice(2).join (" ");
-                r2s.add("error", ruleId, textMessage);
+                const kind = "fail";
+                r2s.add("error", kind, ruleId, textMessage);
             } else {
                 r2.log("sarif adde [id] [message]")
             }
@@ -439,8 +445,9 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
         case '-an':
             if (args.length === 3) {
                 const ruleId = args[1];
+                const kind = "fail";
                 const textMessage = args.slice(2).join (" ");
-                r2s.add("note", ruleId, textMessage);
+                r2s.add("note", kind, ruleId, textMessage);
             } else {
                 r2.log("sarif addn [id] [message]")
             }

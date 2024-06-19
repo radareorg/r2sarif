@@ -6,6 +6,7 @@ export interface ResultMessage {
 export interface Result {
     ruleId: string;
     level: ResultLevel;
+    kind?: string;
     message: ResultMessage;
     locations: Location[]; // (optional) file, line, column information
     relatedLocations?: Location[]; // (optional) additional locations
@@ -19,6 +20,11 @@ export function isValidLevel(k: string) : boolean {
     return levels.indexOf(k) !== -1;
 }
 
+const kinds = [ "notApplicable", "pass", "fail", "review", "open", "informational" ];
+export type ResultKind = (typeof kinds)[number];
+export function isValidKind(k: string) : boolean {
+    return kinds.indexOf(k) !== -1;
+}
 
 export interface SourceLocation {
     fileUri: string;
