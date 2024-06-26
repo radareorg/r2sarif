@@ -4,6 +4,8 @@ SYS_PLUGDIR=$(shell r2 -H R2_LIBR_PLUGINS)
 all: sarif.r2.js
 
 r2: sarif.r2.js
+	@echo "sarif load test/bins/files/sarif.driver.ns.json"
+	@echo "sarif addw"
 	r2 -i sarif.r2.js /bin/ls
 
 clean:

@@ -308,10 +308,10 @@ class R2Sarif {
             r2.log("No driver selected");
             return false;
         }
-        const rules = this.listRulesForDriver(this.currentDriver);
+        const rules = this.listRulesForDriver(this.currentDriver, true);
         const pa = Number(r2.cmd("?p $$"));
         const va = r2.cmd("?v $$").trim();
-        const sz = Number(r2.cmd("b"));
+        const sz = Number(r2.cmd("ao~size[1]")); // b"));
         const fileName = r2.cmd("o.").trim();
         for (const rule of rules) {
             if (rule.id === ruleId) {
@@ -328,7 +328,7 @@ class R2Sarif {
                     physicalLocation: {
                         artifactLocation: {
                             uri: "binary://" + fileName,
-                            uriBaseId: "%SRCROOT%"
+                //            uriBaseId: "%SRCROOT%"
                         },
                         region: {
                             byteOffset: pa,
@@ -341,27 +341,6 @@ class R2Sarif {
                 }
                 result.locations.push(loc);
                 this.currentDocument.addResult(result);
-                // this.currentRun = this.currentDocument.appendRun(this.currentDriver.name, this.currentDriver.version);
-                // this.currentDriver.rules.push(rule);
-                // this.currentDriver.rules.push(result);
-                /*
-                            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "binary://example-binary",
-                  "uriBaseId": "%SRCROOT%"
-                },
-                "region": {
-                  "byteOffset": 1024,
-                  "byteLength": 128
-                }
-              },
-              "properties": {
-                "memoryAddress": "0x0040321A"
-              }
-            }
-
-            */
                 return true;
             }
         }
@@ -406,51 +385,57 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
         case "add":
             if (args.length >= 4) {
                 const levelType = args[1];
-                const ruleId = args[2];
-                const kind = "fail";
-                const textMessage = args.slice(3).join(" ");
+                const kind = args[2];
+                const ruleId = args[3];
+                const textMessage = args.slice(4).join(" ");
+		console.log("level", levelType);
+		console.log("id", ruleId);
+		console.log("kind", kind);
+		console.log("tm", textMessage);
                 if (isValidLevel(levelType)) {
                     r2s.add(levelType, kind, ruleId, textMessage);
                 } else {
                     r2.log("sarif add requires a level: warning, error or note as first argument")
                 }
             } else {
-                r2.log("sarif add [type] [kind] [id] [message]")
+                r2.log("sarif add [type] [kind] [ruleid] [message]")
                 r2.log("type = warning, error, note")
                 r2.log("kind = notApplicable, pass, fail, review, open, informational");
+                r2.log("ruleid = run: sarif list rules");
+                r2.log("message = associated comment represented as a space separated list of words");
             }
             break;
         case 'addw':
         case '-aw':
-            if (args.length === 3) {
-                const ruleId = args[1];
-                const kind = "fail";
-                const textMessage = args.slice(2).join(" ");
+            if (args.length >= 3) {
+                const kind = args[1]
+                const ruleId = args[2];
+                const textMessage = args.slice(3).join(" ");
                 r2s.add("warning", kind, ruleId, textMessage);
             } else {
-                r2.error("sarif addw [id] [message]")
+                r2.error("sarif addw [kind] [id] [message]")
             }
             break;
         case 'adde':
         case '-ae':
-            if (args.length === 3) {
+            if (args.length >= 3) {
                 const ruleId = args[1];
-                const textMessage = args.slice(2).join(" ");
-                const kind = "fail";
+                const kind = args[2];
+                const textMessage = args.slice(3).join(" ");
                 r2s.add("error", kind, ruleId, textMessage);
             } else {
-                r2.log("sarif adde [id] [message]")
+                r2.log("sarif adde [kind] [id] [message]")
             }
             break;
         case 'addn':
         case '-an':
-            if (args.length === 3) {
+            if (args.length >= 3) {
                 const ruleId = args[1];
-                const kind = "fail";
-                const textMessage = args.slice(2).join(" ");
+                const kind = args[2];
+                const textMessage = args.slice(3).join(" ");
                 r2s.add("note", kind, ruleId, textMessage);
             } else {
-                r2.log("sarif addn [id] [message]")
+                r2.log("sarif addn [kind] [id] [message]")
             }
             break;
         case '-A':

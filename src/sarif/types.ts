@@ -57,7 +57,7 @@ export type SourceLineLocation = Partial<
 
 export interface BinaryArtifactLocation {
     uri: string; // "binary://example-binary",
-    uriBaseId: string; // "%SRCROOT%"
+    uriBaseId?: string; // "%SRCROOT%"
 }
 
 export interface BinaryPhysicalLocation {
