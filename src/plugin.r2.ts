@@ -1,4 +1,4 @@
-import { SarifDocument, Driver, ResultKind, BinaryLocation, ResultLevel, Rule, Result, isValidLevel } from "./sarif/types.js";
+import { SarifDocument, Driver, ResultKind, BinaryLocation, ResultLevel, Rule, Result, isValidLevel, isValidKind } from "./sarif/types.js";
 import { SarifGenerator, SarifRun } from "./sarif/generator.js";
 import { tabulateText } from "./sarif/utilsgen.js";
 import { SarifParser } from "./sarif/parser.js"
@@ -308,6 +308,14 @@ class R2Sarif {
             r2.log("No driver selected");
             return false;
         }
+        if (!isValidLevel(level)) {
+            r2.log("Invalid result level: " + level);
+            return false;
+        }
+        if (!isValidKind(kind)) {
+            r2.log("Invalid result kind: " + kind);
+            return false;
+        }
         const rules = this.listRulesForDriver(this.currentDriver, true);
         const pa = Number(r2.cmd("?p $$"));
         const va = r2.cmd("?v $$").trim();
@@ -344,7 +352,7 @@ class R2Sarif {
                 return true;
             }
         }
-        return true;
+        return false;
     }
 }
 
@@ -388,14 +396,8 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
                 const kind = args[2];
                 const ruleId = args[3];
                 const textMessage = args.slice(4).join(" ");
-		console.log("level", levelType);
-		console.log("id", ruleId);
-		console.log("kind", kind);
-		console.log("tm", textMessage);
-                if (isValidLevel(levelType)) {
-                    r2s.add(levelType, kind, ruleId, textMessage);
-                } else {
-                    r2.log("sarif add requires a level: warning, error or note as first argument")
+                if (!r2s.add(levelType, kind, ruleId, textMessage)) {
+                    r2.log("sarif add failed");
                 }
             } else {
                 r2.log("sarif add [type] [kind] [ruleid] [message]")
@@ -411,7 +413,9 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
                 const kind = args[1]
                 const ruleId = args[2];
                 const textMessage = args.slice(3).join(" ");
-                r2s.add("warning", kind, ruleId, textMessage);
+                if (!r2s.add("warning", kind, ruleId, textMessage)) {
+                    r2.error("addw invalid arguments");
+		}
             } else {
                 r2.error("sarif addw [kind] [id] [message]")
             }

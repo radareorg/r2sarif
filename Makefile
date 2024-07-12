@@ -19,7 +19,7 @@ sarif.r2.js: src/plugin.r2.ts
 	cd src && R2PM_OFFLINE=1 r2pm -r r2frida-compile -o ../sarif.r2.js plugin.r2.ts
 
 test:
-	R2R_OFFLINE=1 r2r -i test/db
+	cd test && R2R_OFFLINE=1 r2r -i db
 
 citest:
 	R2R_OFFLINE=1 r2r test/db
