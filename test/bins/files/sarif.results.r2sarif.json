@@ -14,6 +14,7 @@
           "rules": [
             {
               "id": "EXAMPLE-VULN-001",
+              "name": "Buffer Overflow",
               "shortDescription": {
                 "text": "Potential buffer overflow."
               },
@@ -44,6 +45,66 @@
               "properties": {
                 "memoryAddress": "0x0040321A"
               }
+            }
+          ],
+          "codeFlows": [
+            {
+              "threadFlows": [
+                {
+                  "id": "302",
+                  "message": {
+                    "text": "location_id: \"302\""
+                  },
+                  "locations": [
+                    {
+                      "module": "app",
+                      "location": {
+                        "message": {
+                          "text": "@0x100ade70c "
+                        },
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "MyApp.app/MyApp",
+                            "uriBaseId": "APPPAYLOAD"
+                          },
+                          "address": {
+                            "absoluteAddress": 4306364172
+                          },
+                          "region": {
+                            "byteOffset": 173836
+                          }
+                        },
+                        "properties": {
+                          "memoryAddress": "0x100ade70c"
+                        }
+                      }
+                    },
+                    {
+                      "module": "system",
+                      "location": {
+                        "message": {
+                          "text": "@0x1b4cdf090 "
+                        },
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "usr/lib/swift/libswift_Concurrency.dylib",
+                            "uriBaseId": "DEVROOT"
+                          },
+                          "address": {
+                            "absoluteAddress": 7328362640
+                          },
+                          "region": {
+                            "byteOffset": 192656
+                          }
+                        },
+                        "properties": {
+                          "memoryAddress": "0x1b4cdf090"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
