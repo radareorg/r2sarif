@@ -5,9 +5,7 @@ export interface ResultMessage {
     arguments?: string[];
 }
 
-export interface StringMap {
-    [key: string]: string;
-}
+export type StringMap = Map<string,string>;
 export interface Result {
     ruleId: string;
     level: ResultLevel;

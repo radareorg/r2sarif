@@ -251,8 +251,8 @@ class R2Sarif {
         }
     }
 
-    listRulesAsMap(): Map<string, string> {
-        const myMap: Map<string, string> = new Map<string, string>();
+    listRulesAsMap(): StringMap {
+        const myMap: StringMap = new Map<string,string>();
         const rules = this.listRules(true);
         for (const rule of rules) {
             // const desc = rule.shortDescription?.text ?? rule.fullDescription?.text ?? "";
