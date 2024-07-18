@@ -1,4 +1,4 @@
-import { SarifDocument, Driver, ResultKind, BinaryLocation, ResultLevel, Rule, Result, isValidLevel, isValidKind } from "./sarif/types.js";
+import { StringMap, SarifDocument, Driver, ResultKind, BinaryLocation, ResultLevel, Rule, Result, isValidLevel, isValidKind } from "./sarif/types.js";
 import { SarifGenerator, SarifRun } from "./sarif/generator.js";
 import { tabulateText } from "./sarif/utilsgen.js";
 import { SarifParser } from "./sarif/parser.js"
@@ -191,6 +191,7 @@ class R2Sarif {
         }
         return true;
     }
+
     selectDriver(index: number): boolean {
         if (index === -1) {
             this.currentDriverIndex = -1;
@@ -249,13 +250,54 @@ class R2Sarif {
             r2.log(JSON.stringify(doc));
         }
     }
+
+    listRulesAsMap(): Map<string, string> {
+        const myMap: Map<string, string> = new Map<string, string>();
+        const rules = this.listRules(true);
+        for (const rule of rules) {
+            // const desc = rule.shortDescription?.text ?? rule.fullDescription?.text ?? "";
+            const desc = rule.name;
+            myMap.set(rule.id, desc);
+        }
+        return myMap;
+    }
+
     listResults(): Result[] {
         var res: Result[] = [];
+        const ruleMap = this.listRulesAsMap();
         for (const doc of this.docs) {
             for (const run of doc.runs) {
                 if (run.results) {
                     for (const res of run.results) {
-                        r2.log(res.ruleId)
+                        let resultText = res.ruleId;
+                        const desc = ruleMap.get(res.ruleId);
+                        if (desc !== undefined) {
+                            resultText += " :: " + desc;
+                        }
+                        r2.log(resultText);
+                        if (res.message && res.message.arguments) {
+                            const args = res.message.arguments;
+                            const arg0 = args[0];
+                            args.shift();
+                            r2.log("       :: " + arg0 + " (" + args.join (", ") + ")");
+                        }
+                        if (res.codeFlows !== undefined) {
+                            for (const cf of res.codeFlows) {
+                                for (const tf of cf.threadFlows) {
+                                    for (const tfloc of tf.locations) {
+                                        let addr = "0x" + tfloc.location.physicalLocation.address?.absoluteAddress.toString(16);
+                                        let relAddr = tfloc.location.physicalLocation.region.byteOffset;
+                                        let text = " - " + addr + " " + tfloc.module;
+                                        if (tfloc.location) {
+                                            const phys = tfloc.location.physicalLocation;
+                                            text += " " + phys.artifactLocation.uri;
+                                            text += " +" + relAddr;
+                                        }
+                                        r2.log(text);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -282,9 +324,9 @@ class R2Sarif {
         }
         return driver.rules;
     }
-    listRules(): Rule[] {
+    listRules(quiet? : boolean): Rule[] {
         if (this.currentDriver !== null) {
-            return this.listRulesForDriver(this.currentDriver);
+            return this.listRulesForDriver(this.currentDriver, quiet);
         }
         var res: Rule[] = [];
         for (const doc of this.docs) {
