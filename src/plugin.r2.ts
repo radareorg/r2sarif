@@ -275,11 +275,15 @@ class R2Sarif {
                             resultText += " :: " + desc;
                         }
                         r2.log(resultText);
-                        if (res.message && res.message.arguments) {
-                            const args = res.message.arguments;
-                            const arg0 = args[0];
-                            args.shift();
-                            r2.log("       :: " + arg0 + " (" + args.join (", ") + ")");
+                        if (res.message) {
+                            if (res.message.arguments) {
+                                const args = res.message.arguments;
+                                const arg0 = args[0];
+                                args.shift();
+                                r2.log("       :: " + arg0 + " (" + args.join (", ") + ")");
+                            } else if (res.message.text) {
+                                r2.log("       :: " + res.message.text);
+                            }
                         }
                         if (res.codeFlows !== undefined) {
                             for (const cf of res.codeFlows) {
@@ -296,6 +300,17 @@ class R2Sarif {
                                         r2.log(text);
                                     }
                                 }
+                            }
+                        } else if (res.locations) {
+                            for (const loc of res.locations) {
+                                const bloc = loc as BinaryLocation;
+                                let addr = "0x" + bloc.physicalLocation.address?.absoluteAddress.toString(16);
+                                let relAddr = bloc.physicalLocation.region.byteOffset;
+                                let text = " - " + addr + " module";
+                                if (bloc.physicalLocation.region.byteOffset !== undefined) {
+                                    text += " +" + relAddr.toString();
+                                }
+                                r2.log(" - " + text);
                             }
                         }
                     }

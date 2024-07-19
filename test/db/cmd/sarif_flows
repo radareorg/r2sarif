@@ -9,6 +9,7 @@ EXPECT=<<EOF
 Selected driver:
 * 0   NowSecure SARIF Findings0.0.1
 EXAMPLE-VULN-001 :: Buffer Overflow
+       :: Buffer overflow vulnerability detected.
  - 0x100ade70c app MyApp.app/MyApp +173836
  - 0x1b4cdf090 system usr/lib/swift/libswift_Concurrency.dylib +192656
 EOF
