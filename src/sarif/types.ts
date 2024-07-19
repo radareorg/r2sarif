@@ -2,13 +2,17 @@
 
 export interface ResultMessage {
     text: string;
+    arguments?: string[];
 }
+
+export type StringMap = Map<string,string>;
 export interface Result {
     ruleId: string;
     level: ResultLevel;
     kind?: string;
     message: ResultMessage;
     locations: Location[]; // (optional) file, line, column information
+    codeFlows?: CodeFlow[]; // (optional)
     relatedLocations?: Location[]; // (optional) additional locations
     properties?: any;
 }
@@ -40,11 +44,33 @@ export class SarifError extends Error {
 }
 
 export interface BinaryLocation {
+    message?: string;
     physicalLocation: BinaryPhysicalLocation;
     properties: BinaryLocationProperties;
 }
 
 export type Location = SourceLocation | BinaryLocation | SourceLineLocation;
+
+export interface ThreadFlowMessage {
+  text: string;
+}
+export interface ThreadFlowLocation {
+  module: string;
+  message: ThreadFlowMessage;
+  location: BinaryLocation;
+  // physicalLocation: BinaryPhysicalLocation;
+  // properties: any; // memoryAddress: string
+}
+
+export interface ThreadFlow {
+  id: string;
+  message: ThreadFlowMessage;
+  locations: ThreadFlowLocation[];
+}
+
+export interface CodeFlow {
+    threadFlows: ThreadFlow[]
+}
 
 export interface BinaryLocationProperties {
     memoryAddress: string;
@@ -60,8 +86,13 @@ export interface BinaryArtifactLocation {
     uriBaseId?: string; // "%SRCROOT%"
 }
 
+export interface BinaryPhysicalLocationAddress {
+    absoluteAddress: number;
+}
+
 export interface BinaryPhysicalLocation {
     artifactLocation: BinaryArtifactLocation;
+    address?: BinaryPhysicalLocationAddress;
     region: BinaryRegionLocation;
 }
 

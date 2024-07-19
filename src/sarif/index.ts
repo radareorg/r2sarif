@@ -1,3 +1,6 @@
+// XXX UNUSED CODE
+// XXX we can remove this file entirely
+
 import { sarifTemplate } from "./template.js";
 import { Rule, SarifDocument, SarifError } from "./types.js";
 
@@ -12,6 +15,7 @@ class Sarif {
 
   /* load rules from a sarif document */
   loadRules(sarifDocument: any) {
+    // unused
     for (const run of sarifDocument.runs) {
       // maybe this should be a warning.. and loadingRules should return a LoadingReport instead
       if (!run.tool || !run.tool.driver || !run.tool.driver.rules) {
@@ -25,6 +29,7 @@ class Sarif {
   }
 
   loadResults(sarifDocument: any) : Error | undefined {
+    // unused
     const r2baddr = 0;
     for (const run of sarifDocument.runs) {
       let baddr = 0;
@@ -45,6 +50,13 @@ class Sarif {
           message = res.properties.additionalProperties.value;
         } else {
           message = res.message.text;
+        }
+        try {
+          const flows = res.codeFlows;
+          console.log(flows);
+        } catch (e) {
+          console.error(e);
+          // ignore
         }
         const loc0 = res.locations[0];
         try {
