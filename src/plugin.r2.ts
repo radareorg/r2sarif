@@ -16,6 +16,7 @@ interface R2Pipe {
 
 declare global {
     var r2: R2Pipe;
+    function b64(string): string;
 }
 
 function readFileSync(fileName: string): string | Error {
@@ -28,11 +29,12 @@ function readFileSync(fileName: string): string | Error {
 }
 
 const sarifListHelp = `sarif list [type]  # see 'sarif select'
-| json      merge and dump all sarif documents together in json format
 | docs      list all loaded documents
-| rules     list rules from all documents or the selected one
 | drivers   list all drivers available
+| json      merge and dump all sarif documents together in json format
+| r2        list results from all documents loaded as r2 commands
 | results   list all the results/findings from loaded documents
+| rules     list rules from all documents or the selected one
 `.trim();
 
 class R2Sarif {
@@ -136,39 +138,8 @@ class R2Sarif {
             }
         }
         return script.join("\n");
-        /*
-      let script = '# r2sarif script\n';
-      const results = this.doc.runs[0].results;
-      let counter = 0;
-      for (const res of results) {
-        let text = '';
-        if (res && res.properties && res.properties.additionalProperties) {
-          text = res.properties.additionalProperties.value;
-        } else {
-          text = res.message.text;
-        }
-        for (const loc of res.locations) {
-          const address = loc.properties.memoryAddress;
-          const size = loc.physicalLocation.region.byteLength;
-          const ruleId = res.ruleId;
-          // script += `CC ${ruleId}:${text} @ ${address}\n`;
-          const addr = r2.cmd(`?v ${address}`).trim();
-          script += `# ${text} @ ${addr}\n`;
-          // TODO: detect when there are two comments in the same address
-          if (res.ruleId === 'COMMENTS') {
-      const comment = `${text}`;
-            script += `CC ${comment} @ ${address}\n`;
-          } else {
-      const comment = `${ruleId}:${text}`;
-            script += `CC ${comment} @ ${address}\n`;
-            script += `f sarif.${counter} ${size} ${address}\n`;
-          }
-          counter++;
-        }
-      }
-      return script;
-      */
     }
+
     loadSarif(args: string[]): boolean {
         if (args.length === 1) {
             const [fileName] = args;
@@ -251,69 +222,142 @@ class R2Sarif {
         }
     }
 
-    listRulesAsMap(): StringMap {
+    getRulesAsMap(): StringMap {
         const myMap: StringMap = new Map<string,string>();
         const rules = this.listRules(true);
         for (const rule of rules) {
+            if (myMap.get(rule.id)) {
+                r2.error("Duplicated RuleID: " + rule.id);
+            }
             // const desc = rule.shortDescription?.text ?? rule.fullDescription?.text ?? "";
-            const desc = rule.name;
-            myMap.set(rule.id, desc);
+            myMap.set(rule.id, rule.name);
         }
         return myMap;
     }
 
-    listResults(): Result[] {
-        var res: Result[] = [];
-        const ruleMap = this.listRulesAsMap();
+    getAllResults() : Result[] {
+        var allResults: Result[] = [];
         for (const doc of this.docs) {
             for (const run of doc.runs) {
                 if (run.results) {
                     for (const res of run.results) {
-                        let resultText = res.ruleId;
-                        const desc = ruleMap.get(res.ruleId);
-                        if (desc !== undefined) {
-                            resultText += " :: " + desc;
-                        }
-                        r2.log(resultText);
-                        if (res.message) {
-                            if (res.message.arguments) {
-                                const args = res.message.arguments;
-                                const arg0 = args[0];
-                                args.shift();
-                                r2.log("       :: " + arg0 + " (" + args.join (", ") + ")");
-                            } else if (res.message.text) {
-                                r2.log("       :: " + res.message.text);
-                            }
-                        }
-                        if (res.codeFlows !== undefined) {
-                            for (const cf of res.codeFlows) {
-                                for (const tf of cf.threadFlows) {
-                                    for (const tfloc of tf.locations) {
-                                        let addr = "0x" + tfloc.location.physicalLocation.address?.absoluteAddress.toString(16);
-                                        let relAddr = tfloc.location.physicalLocation.region.byteOffset;
-                                        let text = " - " + addr + " " + tfloc.module;
-                                        if (tfloc.location) {
-                                            const phys = tfloc.location.physicalLocation;
-                                            text += " " + phys.artifactLocation.uri;
-                                            text += " +" + relAddr;
-                                        }
-                                        r2.log(text);
-                                    }
-                                }
-                            }
-                        } else if (res.locations) {
-                            for (const loc of res.locations) {
-                                const bloc = loc as BinaryLocation;
-                                let addr = "0x" + bloc.physicalLocation.address?.absoluteAddress.toString(16);
-                                let relAddr = bloc.physicalLocation.region.byteOffset;
-                                let text = " - " + addr + " module";
-                                if (bloc.physicalLocation.region.byteOffset !== undefined) {
-                                    text += " +" + relAddr.toString();
-                                }
-                                r2.log(" - " + text);
-                            }
+                        allResults.push(res);
+                    }
+                }
+            }
+        }
+        return allResults;
+    }
+
+    listResultsAsR2() {
+        var res: Result[] = [];
+        const ruleMap = this.getRulesAsMap();
+        const results = this.getAllResults();
+        const script : string[] = [];
+        // TODO Find base address of all the artifacts involved
+        for (const res of results) {
+            if (!res.locations && !res.codeFlows) {
+                console.error("This result has no locations or codeFlows " + res.ruleId);
+                continue;
+            }
+            let addr = "";
+            if (res.locations) {
+                const bloc = res.locations[0] as BinaryLocation;
+                addr = "0x" + bloc.physicalLocation.address?.absoluteAddress.toString(16);
+            } else if (res.codeFlows) {
+                for (const cf of res.codeFlows) {
+                    for (const tf of cf.threadFlows) {
+                        const tfloc = cf.threadFlows[0].locations[0];
+                        addr = "0x" + tfloc.location.physicalLocation.address?.absoluteAddress.toString(16);
+                        break;
+                    }
+                }
+            }
+            const desc = ruleMap.get(res.ruleId);
+            const comment = `${res.ruleId}: ${desc}`;
+            script.push(`'@${addr}'CC ${comment}`);
+            // script.push("CC base64:" + b64(comment) + " @ " + addr);
+
+            if (res.message) {
+                let message: undefined|string = undefined;
+                if (res.message.arguments) {
+                    const args = res.message.arguments;
+                    const arg0 = args[0];
+                    args.shift();
+                    const argText = args.join(", ");
+                    message = `${arg0}(${argText})`;
+                } else if (res.message.text) {
+                    message = res.message.text;
+                }
+                if (message) {
+                    // script.push("CC base64:" + b64(message) + " @ " + addr);
+                    script.push(`'@${addr}'CC ${message}`);
+                }
+            }
+            const codeflow : string[] = [];
+            if (res.codeFlows !== undefined) {
+                for (const cf of res.codeFlows) {
+                    for (const tf of cf.threadFlows) {
+                        for (const tfloc of tf.locations) {
+                            let addr = "0x" + tfloc.location.physicalLocation.address?.absoluteAddress.toString(16);
+                            codeflow.push(addr);
                         }
                     }
+                }
+            }
+            if (codeflow.length > 0) {
+                script.push("'abt+" + codeflow.join(" "));
+            }
+        }
+        r2.log(script.join("\n"));
+    }
+    listResults(): Result[] {
+        var res: Result[] = [];
+        const ruleMap = this.getRulesAsMap();
+        const results = this.getAllResults();
+        for (const res of results) {
+            let resultText = res.ruleId;
+            const desc = ruleMap.get(res.ruleId);
+            if (desc !== undefined) {
+                resultText += " :: " + desc;
+            }
+            r2.log(resultText);
+            if (res.message) {
+                if (res.message.arguments) {
+                    const args = res.message.arguments;
+                    const arg0 = args[0];
+                    args.shift();
+                    r2.log("       :: " + arg0 + " (" + args.join(", ") + ")");
+                } else if (res.message.text) {
+                    r2.log("       :: " + res.message.text);
+                }
+            }
+            if (res.codeFlows !== undefined) {
+                for (const cf of res.codeFlows) {
+                    for (const tf of cf.threadFlows) {
+                        for (const tfloc of tf.locations) {
+                            let addr = "0x" + tfloc.location.physicalLocation.address?.absoluteAddress.toString(16);
+                            let relAddr = tfloc.location.physicalLocation.region.byteOffset;
+                            let text = " - " + addr + " " + tfloc.module;
+                            if (tfloc.location) {
+                                const phys = tfloc.location.physicalLocation;
+                                text += " " + phys.artifactLocation.uri;
+                                text += " +" + relAddr;
+                            }
+                            r2.log(text);
+                        }
+                    }
+                }
+            } else if (res.locations) {
+                for (const loc of res.locations) {
+                    const bloc = loc as BinaryLocation;
+                    let addr = "0x" + bloc.physicalLocation.address?.absoluteAddress.toString(16);
+                    let relAddr = bloc.physicalLocation.region.byteOffset;
+                    let text = " - " + addr + " module";
+                    if (bloc.physicalLocation.region.byteOffset !== undefined) {
+                        text += " +" + relAddr.toString();
+                    }
+                    r2.log(" - " + text);
                 }
             }
         }
@@ -547,6 +591,9 @@ function sarifCommand(r2s: R2Sarif, cmd: string): boolean {
                     case "res":
                     case "results":
                         r2s.listResults();
+                        break;
+                    case "r2":
+                        r2s.listResultsAsR2();
                         break;
                     case "-d":
                     case "drv":
