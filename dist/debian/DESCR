@@ -1,0 +1,2 @@
+SARIF support for radare2
+radare2 plugin to import/export Static Analysis Results Interchange Format (SARIF) documents to let the analyst report and visualize vulnerabilities in a binary.
