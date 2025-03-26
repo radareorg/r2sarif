@@ -24,7 +24,7 @@ all: root
 root:
 	mkdir -p root/$(R2PLUGDIR)
 	$(MAKE) -C ../..
-	cp -f ../../r2sarif.r2.js root/$(R2PLUGDIR)
+	cp -f ../../sarif.r2.js root/$(R2PLUGDIR)
 
 purge: clean
 	rm -rf root
