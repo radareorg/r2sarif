@@ -49,7 +49,7 @@ jobs:
         radare2/sys/install.sh > /dev/null
     - name: Installing r2frida
       run: |
-        r2pm -ci r2frida > /dev/null
+        r2pm -Uci r2frida > /dev/null
     - name: Building
       run: make
     - name: Running tests
