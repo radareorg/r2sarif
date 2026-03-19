@@ -9,14 +9,13 @@ r2: sarif.r2.js
 	r2 -i sarif.r2.js /bin/ls
 
 clean:
-	rm -f sarif.r2.js src/types.js
+	rm -f sarif.r2.js src/plugin.r2.js src/types.js src/sarif/types.js
 
 vs:
 	open -a "Visual Studio Code" .
 
 sarif.r2.js: src/plugin.r2.ts
-	cd src/sarif && R2PM_OFFLINE=1 r2pm -r r2frida-compile -o types.js types.ts
-	cd src && R2PM_OFFLINE=1 r2pm -r r2frida-compile -o ../sarif.r2.js plugin.r2.ts
+	R2PM_OFFLINE=1 r2pm -r r2frida-compile -T none -o sarif.r2.js src/plugin.r2.ts
 
 test:
 	cd test && R2R_OFFLINE=1 r2r -i db
